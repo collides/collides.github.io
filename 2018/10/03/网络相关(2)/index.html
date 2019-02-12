@@ -1,0 +1,85 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.8.0"><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>网络相关(2) | Hexo</title><link rel="stylesheet" type="text/css" href="//fonts.neworld.org/css?family=Source+Code+Pro"><link rel="stylesheet" type="text/css" href="/css/style.css?v=2.0.1"><link rel="stylesheet" type="text/css" href="/css/highlight.css?v=2.0.1"><link rel="Shortcut Icon" href="/favicon.ico"><link rel="bookmark" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">网络相关(2)</h1><a id="logo" href="/.">Hexo</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div><div id="search-form"><div id="result-mask" class="hide"></div><label><input id="search-key" type="text" autocomplete="off" placeholder="Arama"></label><div id="result-wrap" class="hide"><div id="search-result"></div></div><div class="hide"><template id="search-tpl"><div class="item"><a href="/{path}" title="{title}"><div class="title">{title}</div><div class="time">{date}</div><div class="tags">{tags}</div></a></div></template></div></div></div><div id="layout" class="layout-g"><div class="layout-l"><div class="content_container"><div class="post"><h1 class="post-title">网络相关(2)</h1><div class="post-meta"><a href="/2018/10/03/网络相关(2)/#comments" class="comment-count"></a><p><span class="date">Oct 03, 2018</span><span><i id="busuanzi_container_page_pv"><i id="busuanzi_value_page_pv"></i><i>点击</i></i></span></p></div><div class="post-content"><h2 id="UDP"><a href="#UDP" class="headerlink" title="UDP"></a>UDP</h2><h3 id="面向报文"><a href="#面向报文" class="headerlink" title="面向报文"></a>面向报文</h3><p>UDP是一个面向报文（报文可以理解成为一段段的数据）的协议，意思就是UDP只是报文的搬运工，不会对报文进行任何处理。</p>
+<p>具体来说</p>
+<ul>
+<li>在发送端，应用层将数据传递给传输层的UDP协议，UDP只会给数据增加一个UDP头标识下是UDP协议，然后就传递给网络层了</li>
+<li>在接收端，网络层将数据传递给传输层，UDP只去除IP报文头就传递给应用层，不会任何操作。</li>
+</ul>
+<h3 id="不可靠性"><a href="#不可靠性" class="headerlink" title="不可靠性"></a>不可靠性</h3><ol>
+<li>UDP是无连接的，也就是说通信不需要建立和断开。</li>
+<li>UDP也是不可靠的，协议收到什么数据就传递什么数据，并且也不会备份数据，对方能不能收到也是不关心的。</li>
+<li>UDP没有拥塞控制，一直会以恒定的速度发送数据，即使网络条件不好，也不会对发送的速率进行调整，这样实现的弊端就是网络条件不好的情况下可能会导致丢包，但是优点也很明显，在某些实时性要求高的场景就需要使用UDP.</li>
+</ol>
+<h3 id="高效"><a href="#高效" class="headerlink" title="高效"></a>高效</h3><p>因为UDP没有TCP那么复杂，需要保证数据不丢失且有序到达，所以UDP的头部开销小，只有8字节，相比TCP的至少20字节要少的多，在传输数据报文时是很高效的。</p>
+<p>头部包含了以下几个数据</p>
+<ol>
+<li>两个十六位的端口号，分别为源端口（可选）和目标端口</li>
+<li>整个数据报文的长度</li>
+<li>整个数据报文的检验和（IPv4可选字段），该字段用于发现头部信息和数据中的错误。</li>
+</ol>
+<p>UDP支持一对多,多对多,多对一的传输方式，</p>
+<h2 id="TCP"><a href="#TCP" class="headerlink" title="TCP"></a>TCP</h2><h3 id="头部"><a href="#头部" class="headerlink" title="头部"></a>头部</h3><p>TCP的头部字段包含：</p>
+<ol>
+<li>Seq(Sequenc number)，这个序号保证了tcp传输的报文都是有顺序的，对端可以进行拼接报文</li>
+<li>Ack(Acknowledgement Number)，这个序号表示数据接收端期望接受的下一个字节的编号是多少，也表示上一个数据已收到</li>
+<li>Winodw Size，滑动窗口大小，表示还能接受多少字节的数据，用于流量控制</li>
+<li>标识符 <ul>
+<li>URG：表示本数据报的数据部分包含紧急信息，是一个高优先级数据报文，此时紧急指针有效，紧急数据一定位于当前数据包数据部分的最前面，紧急指针表明了紧急数据的尾部。</li>
+<li>ACK：表示确认字段，此外，TCP还规定连接建立后传送的所有报文段都必须吧ACK置为1.</li>
+<li>PSH：表示接收端应该立即将数据PUSH给应用层，而不是等到缓冲区满后再提交</li>
+<li>RST：表示当前TCP连接出现严重问题，可能需要重新连接TCP连接，也可以用于拒绝非法的报文段和拒绝连接。</li>
+<li>SYN：当SYN=1,ACK=0时，表示当前报文段是一个连接请求报文，当SYN=1,ACK=1时表示当前报文时一个同意建立连接的应答报文</li>
+<li>FIN：表示该字段是一个释放连接的请求报文</li>
+</ul>
+</li>
+</ol>
+<h3 id="ARQ协议"><a href="#ARQ协议" class="headerlink" title="ARQ协议"></a>ARQ协议</h3><p>ARQ协议也就是超时重传机制，通过确认和超时机制保证了数据的正确送达，ARQ协议包含停止等待ARQ和连续ARQ</p>
+<h4 id="等待ARQ"><a href="#等待ARQ" class="headerlink" title="等待ARQ"></a>等待ARQ</h4><h4 id="正常传输过程"><a href="#正常传输过程" class="headerlink" title="正常传输过程"></a>正常传输过程</h4><p>只要A向B发送一段报文，都要停止发送并启动一个定时器，等待对端回应，在定时器时间内介绍到对端应答就取消定时器并发送下一段报文。</p>
+<h4 id="报文丢失或出错"><a href="#报文丢失或出错" class="headerlink" title="报文丢失或出错"></a>报文丢失或出错</h4><p>在报文传输的过程中可能会出现丢包，这时候超过定时器设定的时间就会再次发送丢包的数据直到对端响应，所以需要每次都备份发送的数据。</p>
+<p>即使报文正常的传输到对端，也可能出现在传输过程中报文出错的问题，这时候对端会丢弃该报文并等待A重传。</p>
+<p>一般定时器设定的时间都会大于一个RTT的平均时间。</p>
+<h4 id="ACK超时或丢失"><a href="#ACK超时或丢失" class="headerlink" title="ACK超时或丢失"></a>ACK超时或丢失</h4><p>对端传输的应答也可能出现丢失或超时的情况，那额超过定时器时间A端照样会重新传输报文，这时候B端收到相同的seq报文会丢弃该报文并重传应答，直到A端发送下一个报文。</p>
+<p>在超时的情况下也可能出现应答很迟到达，这时候A端会判断该需要是否已经接收过，如果接受过只需要丢弃应答即可。</p>
+<p>这个协议的缺点就是传输效率低，在良好的网络环境下每次发送报文都得等待对端的ACK。</p>
+<h4 id="连续ARQ"><a href="#连续ARQ" class="headerlink" title="连续ARQ"></a>连续ARQ</h4><p>在连续ARQ中，发送端拥有一个发送窗口，可以在没有收到应答的情况下连续发送窗口内数据，这样相比停止等待ARQ协议来说减少了等待时间，提高了效率。</p>
+<h4 id="累计确认"><a href="#累计确认" class="headerlink" title="累计确认"></a>累计确认</h4><p>连续ARQ中，接收端会持续不断的收到报文，如果和停止等待ARQ中接受一个报文就发送一个应答一样就太浪费资源了，通过累计确认可以在收到多个报文以后统一回复一个应答报文，报文中的ACK可以用来告诉发送端这个序号之前的数据已经全部收到了，下次请发送这个序号+1的数据。</p>
+<p>但是累计确认也有一个弊端，在连续接受报文时，可能会遇到接受到序号5的报文后，并未接收到序号6的报文，然而序号7以后的报文已经接收，遇到这种情况时ACK只能回复6，这样会造成发送端重复发送数据，这种情况下可以通过Sack来解决，这个会在下面说到。</p>
+<h3 id="滑动窗口"><a href="#滑动窗口" class="headerlink" title="滑动窗口"></a>滑动窗口</h3><p>在上面讲到了发送窗口，在TCP中两端都维护着窗口：分别为发送端/接收端窗口。</p>
+<p>发送端窗口包含已发送但未收到应答的数据和可以发送但是未发送的数据。</p>
+<p>发送端窗口是由接受窗口剩余大小决定的，接收方会把当前接受窗口剩余的大小写入应答报文，发送端收到应答后根据该值和当前网络拥塞情况设置发送窗口的大小，所以发送窗口的大小是不断变化的。</p>
+<p>当发送端接收到应答报文后，会随之将窗口进行滑动</p>
+<p>滑动窗口实现了流量控制，接收方通过报文告知发送方还可以发送多少数据，从而保证接收方能来得及接受数据。</p>
+<h4 id="Zero窗口"><a href="#Zero窗口" class="headerlink" title="Zero窗口"></a>Zero窗口</h4><p>在发送报文的过程中，可能会遇到对端出现零窗口的情况，在该情况下，发送端会停止发送数据，并启动 persistent timer，该定时器会定时发送请求给对端让对端告知窗口大小，在重试次数超过一定次数后，可能会断开TCP连接。</p>
+<h3 id="拥塞处理"><a href="#拥塞处理" class="headerlink" title="拥塞处理"></a>拥塞处理</h3><p>拥塞处理和流量控制不同，后者是作用于接收方，保证接收方来得及接受数据，而前者是作用于网络，防止过多的数据拥塞网络，避免出现网络负载过大的情况。</p>
+<p>拥塞处理包括了四个算法，分别为：慢开始，拥塞避免，快重传，快恢复。</p>
+<h4 id="慢开始算法"><a href="#慢开始算法" class="headerlink" title="慢开始算法"></a>慢开始算法</h4><p>在传输开始时将发送窗口慢慢指数级别扩大，从而避免一开始就传输大量数据导致网络拥塞。</p>
+<ol>
+<li>连接初始设置拥塞窗口为 1MSS （一个分段的最大数据量）</li>
+<li>每过一个RTT就将窗口大小乘2</li>
+<li>指数级增长肯定不能没有限制的，所以有一个阈值限制，当窗口大小法语阈值时就会启动拥塞避免算法。</li>
+</ol>
+<h4 id="拥塞避免算法"><a href="#拥塞避免算法" class="headerlink" title="拥塞避免算法"></a>拥塞避免算法</h4><p>每 过一个RTT窗口大小只加一，这样就能够避免指数级别增长带来的网络拥塞，慢慢将大小调整到最佳值。</p>
+<p>在传输过程中可能定时器超时的情况，这时候TCP会认为网络拥塞了，会马上：</p>
+<ol>
+<li>将阈值设为当前发送数据拥塞窗口的一半</li>
+<li>将拥塞窗口设为1MSS</li>
+<li>启动拥塞避免算法</li>
+</ol>
+<h4 id="快速重传"><a href="#快速重传" class="headerlink" title="快速重传"></a>快速重传</h4><p>快速重传一般和快恢复一起出现，一旦接收端收到的报文出现失序的情况，接收端只会回复最后一个顺序正确的报文序号（没有Sack的情况下）。如果收到三个重复的ACK，无需等待定时器超时再重发而是启动快速重传。具体算法分为两种：</p>
+<p>TCP Taho实现如下：</p>
+<ul>
+<li>将阈值设为当前拥塞窗口的一半</li>
+<li>将拥塞窗口设为1MSS</li>
+<li>重新开始慢开始算法</li>
+</ul>
+<p>TCP Reno实现如下：</p>
+<ul>
+<li>拥塞窗口减半</li>
+<li>将阈值设为当前拥塞窗口</li>
+<li>进入快恢复阶段（重发对端需要的包，一旦收到一个新的ACK答复就退出该阶段）</li>
+<li>使用拥塞避免算法</li>
+</ul>
+<h3 id="Tcp-New-Ren-改进后的快恢复"><a href="#Tcp-New-Ren-改进后的快恢复" class="headerlink" title="Tcp New Ren 改进后的快恢复"></a>Tcp New Ren 改进后的快恢复</h3><p>Tcp New Reno算法改进了之前TCP Reno算法的缺陷。在之前，快恢复中只要收到一个新的ACK包，就会退出快恢复。</p>
+<p>在TCP New Reno中，TCP发送方先记下三个重复ACK的分段的最大序号。</p>
+<p>假如我有一个分段数据是1-10 这十个序号的报文，其中丢失了序号为3和7的报文，那么该分段的最大序号就是10.发送端只会收到ACK序号为3的应答。这时候重发序号 为3的报文，接收方顺利接受并会发送ACK序号为7的应答。这时候TCP指导对端是有多个包未收到，会继续发送序号Wie7的报文，接收方顺利接受并会发送ACK序号为11的应答，这时发送端认为这个分段接收端已经顺利接受，接下来会退出快恢复阶段。</p>
+</div><div class="tags"></div><div class="post-share"><div class="bdsharebuttonbox"><span style="float:left;line-height: 28px;height: 28px;font-size:16px;font-weight:blod">分享到：</span><a href="#" data-cmd="more" class="bds_more"></a><a href="#" data-cmd="mshare" title="分享到一键分享" class="bds_mshare"></a><a href="#" data-cmd="fbook" title="分享到Facebook" class="bds_fbook"></a><a href="#" data-cmd="twi" title="分享到Twitter" class="bds_twi"></a><a href="#" data-cmd="linkedin" title="分享到linkedin" class="bds_linkedin"></a><a href="#" data-cmd="youdao" title="分享到有道云笔记" class="bds_youdao"></a><a href="#" data-cmd="evernotecn" title="分享到印象笔记" class="bds_evernotecn"></a><a href="#" data-cmd="weixin" title="分享到微信" class="bds_weixin"></a><a href="#" data-cmd="qzone" title="分享到QQ空间" class="bds_qzone"></a><a href="#" data-cmd="tsina" title="分享到新浪微博" class="bds_tsina"></a></div></div><div class="post-nav"><a href="/2019/02/07/webpack打包原理/" class="pre"></a><a href="/2018/06/07/深入浏览器理解CSS animations 和transitions的性能问题/" class="next">深入浏览器理解css动画和过渡</a></div><div id="comments"></div></div></div></div><div class="layout-r"><div id="sidebar"><div class="search-pla"></div><div id="toc" class="widget"><div class="widget-title"><i class="fa fa-fei">文章目录</i></div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#UDP"><span class="toc-text">UDP</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#面向报文"><span class="toc-text">面向报文</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#不可靠性"><span class="toc-text">不可靠性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#高效"><span class="toc-text">高效</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#TCP"><span class="toc-text">TCP</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#头部"><span class="toc-text">头部</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ARQ协议"><span class="toc-text">ARQ协议</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#等待ARQ"><span class="toc-text">等待ARQ</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#正常传输过程"><span class="toc-text">正常传输过程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#报文丢失或出错"><span class="toc-text">报文丢失或出错</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ACK超时或丢失"><span class="toc-text">ACK超时或丢失</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#连续ARQ"><span class="toc-text">连续ARQ</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#累计确认"><span class="toc-text">累计确认</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#滑动窗口"><span class="toc-text">滑动窗口</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Zero窗口"><span class="toc-text">Zero窗口</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#拥塞处理"><span class="toc-text">拥塞处理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#慢开始算法"><span class="toc-text">慢开始算法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#拥塞避免算法"><span class="toc-text">拥塞避免算法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#快速重传"><span class="toc-text">快速重传</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Tcp-New-Ren-改进后的快恢复"><span class="toc-text">Tcp New Ren 改进后的快恢复</span></a></li></ol></li></ol></div><div class="widget"><div class="widget-title"><i class="fa fa-xie"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/02/07/webpack打包原理/">webpack打包原理</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/03/网络相关(2)/">网络相关(2)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/06/07/深入浏览器理解CSS animations 和transitions的性能问题/">深入浏览器理解css动画和过渡</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/02/01/网络知识(1)/">网络相关(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/01/21/移动端适配/">移动端适配</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/01/07/数据结构相关/">数据结构</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/01/03/js严格模式/">My Gallery</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-biao"> 标签</i></div><div class="tagcloud"></div></div><div class="widget"><div class="widget-title"><i class="fa fa-archive"> 归档</i></div><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">十月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">六月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">二月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-you"> 友情链接</i></div><ul></ul><a href="http://www.example1.com/" title="site-name1" target="_blank">site-name1</a><ul></ul><a href="http://www.example2.com/" title="site-name2" target="_blank">site-name2</a><ul></ul><a href="http://www.example3.com/" title="site-name3" target="_blank">site-name3</a></div></div></div></div><a id="totop" href="#top"></a><div id="footer"><div class="footer-info"><p><a href="/baidusitemap.xml">Baidu Site Haritası</a> |  <a href="/atom.xml">订阅</a> |  <a href="/about/">关于</a></p><p>本站总访问量：<i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>次</p><p><span> Copyright &copy;<a href="/." rel="nofollow">John Doe.</a></span><span> Theme by<a rel="nofollow" target="_blank" href="https://github.com/chaooo/hexo-theme-BlueLake"> BlueLake.</a></span><span> Count by<a href="http://busuanzi.ibruce.info/"> busuanzi.</a></span><span> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a></span></p></div></div></div><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><script type="text/javascript" src="/js/search.json.js?v=2.0.1"></script><script type="text/javascript" src="/js/toctotop.js?v=2.0.1" async></script><script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":["mshare","weixin","tsina","qzone","linkedin","fbook","twi","print","renren","sqq","evernotecn","bdysc","tqq","tqf","bdxc","kaixin001","tieba","douban","bdhome","thx","ibaidu","meilishuo","mogujie","diandian","huaban","duitang","hx","fx","youdao","sdo","qingbiji","people","xinhua","mail","isohu","yaolan","wealink","ty","iguba","h163","copy"],"bdPic":"","bdStyle":"1","bdSize":"16"},"share":{},"image":{"viewList":["tsina","qzone","weixin","fbook","twi","linkedin","youdao","evernotecn","mshare"],"viewText":"分享到：","viewSize":"16"},"selectShare":{"bdContainerClass":null,"bdSelectMiniList":["tsina","qzone","weixin","fbook","twi","linkedin","youdao","evernotecn","mshare"]}};with(document)0[(getElementsByTagName('head')[0]||head).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script></body></html>
