@@ -6,4 +6,4 @@ cache:
   directories:
   - node_modules
 before_install:
-  - script: node ./compile.js
+  script: node ./compile.js
